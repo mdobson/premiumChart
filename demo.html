@@ -3,11 +3,16 @@
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
+		  var sampDat = '{"totalEnrolled":63,"enrolledBySiteAndType":[[16,"CHF","A"],[18,"Stroke","A"],[11,"Systemic Infection","A"],[1,"CHF","B"],[1,"Stroke","B"],[4,"CHF","C"],[11,"Systemic Infection","C"],[1,"Systemic Infection","E"]],"totalsBySite":[[45,"A"],[2,"B"],[16,"C"],[1,"E"]],"basedOnType":[[21,"CHF"],[19,"Stroke"],[23,"Systemic Infection"]]}';
+		
+		obj = JSON.parse(sampDat);
 		// Load the Visualization API and the piechart package.
 		  google.load('visualization', '1.0', {'packages':['corechart']});
 
 		  // Set a callback to run when the Google Visualization API is loaded.
 		  google.setOnLoadCallback(drawChart);
+		  google.setOnLoadCallback(drawBarChart);
+		  google.setOnLoadCallback(drawEnrollmentsBySiteAndType);
 
 		  // Callback that creates and populates a data table, 
 		  // instantiates the pie chart, passes in the data and
@@ -19,26 +24,127 @@
 		  data.addColumn('string', 'Study Group');
 		  data.addColumn('number', 'Percent Enrollment');
 		  data.addRows([
-		    ['Stroke', 27],
-		    ['Sepsis', 41],
-		    ['CHF',32], 
+		    [obj.basedOnType[0][1], obj.basedOnType[0][0]],
+		    [obj.basedOnType[1][1], obj.basedOnType[1][0]],
+		    [obj.basedOnType[2][1], obj.basedOnType[2][0]], 
 
 		  ]);
+		
+		  
 
 		  // Set chart options
 		  var options = {'title':'PREMIUM Enrollment Information',
-		                 'width':400,
+		                 'width':500,
 		                 'height':300};
 
 		  // Instantiate and draw our chart, passing in some options.
-		  var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+		  var chart = new google.visualization.PieChart(document.getElementById('pie_chart_div'));
 		  chart.draw(data, options);
+		}
+		
+		function drawBarChart()
+		{
+			var data = new google.visualization.DataTable();
+			data.addColumn('string', 'Total');
+			data.addColumn('number', 'Enrollments');
+			data.addRows(1);
+			data.setValue(0,0,"Enrollment Total");
+			data.setValue(0,1,obj.totalEnrolled);
+			
+			var chart = new google.visualization.ColumnChart(document.getElementById('bar_chart_div'));
+			chart.draw(data, {width:500, height:240, title:"Total Enrollments for PREMIUM", 
+				hAxis:{title:"Total", titleTextStyle:{color:'red'}}
+				});
+			
+		}
+		
+		function drawEnrollmentsBySiteAndType()
+		{
+			/*var data = new google.visualization.DataTable();
+			data.addColumn('string', 'Site');
+			data.addColumn('string', 'Enrollment Type');
+			data.addColumn('number', 'Enrollments');
+			data.addRows(1);
+			data.setValue(0,0,"A");
+			data.setValue(0,1,"CHF");
+			data.setValue(0,2,3);
+			
+			
+			
+			var chart = new google.visualization.ColumnChart(document.getElementById('total_chart_div'));
+			chart.draw(data, {width:500, height:240, title:"Enrollments by site and type", 
+				hAxis:{title:"Total", titleTextStyle:{color:'red'}}
+				});*/
+				
+			 var data = new google.visualization.DataTable();
+			        data.addColumn('string', 'Site');
+			        data.addColumn('number', 'Stroke');
+			        data.addColumn('number', 'Systemic Infection');
+					data.addColumn('number', 'CHF')
+			        data.addRows(5);
+			        data.setValue(0, 0, 'A');
+			
+			        data.setValue(1, 0, 'B');
+			       
+			        data.setValue(2, 0, 'C');
+			       
+			        data.setValue(3, 0, 'D');
+			
+					data.setValue(4, 0, 'E');
+					
+					
+			        
+					for(var i = 0; i<obj.enrolledBySiteAndType.length; i++)
+					{
+						
+						switch(obj.enrolledBySiteAndType[i][2])
+						{
+							case "A":
+								var firstNum = 0;
+								break;
+							case "B":
+								var firstNum = 1;
+								break;
+							case "C":
+								var firstNum = 2;
+								break;
+							case "D":
+								var firstNum = 3;
+								break;
+							case "E":
+								var firstNum = 4;
+								break;
+						}
+								
+						switch(obj.enrolledBySiteAndType[i][1])
+						{
+							case "Stroke":
+								var secNum = 1;
+								break;
+							case "Systemic Infection":
+								var secNum = 2;
+								break;
+							case "CHF":
+								var secNum = 3;
+								break;
+						}
+						data.setValue(firstNum, secNum, obj.enrolledBySiteAndType[i][0]);	
+							
+					}
+					
+					
+					
+			        var chart = new google.visualization.BarChart(document.getElementById('total_chart_div'));
+			        chart.draw(data, {width: 600, height: 740, title: 'Enrollments by Site and Type',
+			                          vAxis: {title: 'Site', titleTextStyle: {color: 'red'}} });
 		}
     </script>
   </head>
 
   <body>
     <!--Div that will hold the pie chart-->
-    <div id="chart_div"></div>
+    <div id="pie_chart_div"></div>
+	<div id="bar_chart_div"></div>
+	<div id="total_chart_div"></div>
   </body>
 </html>
