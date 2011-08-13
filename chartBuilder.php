@@ -1,4 +1,5 @@
 <?php
+<?php
 
 include("mssqldatabase.php");
 
@@ -8,23 +9,24 @@ function dataPull()
 	$returnArray = array();
 	$queryRet = mssql_query($sql);
 	
-	while($row = mssql_fetch_object($queryRet))
+	while($row = mssql_fetch_row($queryRet))
 	{
 		
-		$total = $row->Column1;
-		$studyType = $row->StudyAnswerDropDown;
-		$site = $row->SiteId;
+		$total = $row[0];
+		$studyType = $row[1];
+		$site = $row[2];
+		
 		array_push($returnArray, array($total,$studyType,$site));
 		
 	}
 	
-	return $total;
+	return $returnArray;
 }
 
 function returnTotalEnrollment($array)
 {
 	$total = 0;
-	foreach($row in $array)
+	foreach($array as $row)
 	{
 		$total = $total + $row[0];
 	}
@@ -33,28 +35,44 @@ function returnTotalEnrollment($array)
 	
 }
 
-function returnSiteEnrollment($array)
+function returnSiteEnrollment()
 {
+	$sql = "pullSiteEnrollmentData";
 	$returnArray = array();
-	foreach($row in $array)
+	$queryRet = mssql_query($sql);
+	
+	while($row = mssql_fetch_row($queryRet))
 	{
-		if(in_array($array[2], array_keys($returnArray)))
-		{
-			$returnArray[$array[2]] = $returnArray[$array[2]] + $array[0];	
-		}	
-	}	
+		
+		$total = $row[0];
+		$site = $row[1];
+		
+		
+		array_push($returnArray, array($total,$site));
+		
+	}
+	
+	return $returnArray;	
 }
 
-function returnEnrollmentBasedOnType($array)
+function returnEnrollmentBasedOnType()
 {
+	$sql = "pullEnrollmentDataBasedOnStudyGroup";
 	$returnArray = array();
-	foreach($row in $array)
+	$queryRet = mssql_query($sql);
+	
+	while($row = mssql_fetch_row($queryRet))
 	{
-		if(in_array($array[1], array_keys($returnArray)))
-		{
-			$returnArray[$array[1]] = $returnArray[$array[1]] + $array[0];	
-		}	
+		
+		$total = $row[0];
+		$studyType = $row[1];
+		
+		
+		array_push($returnArray, array($total,$studyType));
+		
 	}
+	
+	return $returnArray;
 	
 }
 
@@ -65,14 +83,11 @@ function main()
 	$siteTotals = returnSiteEnrollment($siteAndType);
 	$basedOnType = returnEnrollmentBasedOnType($siteAndType);
 	
-	echo"Pulling charts data";
-	
-	var_dump($siteAndType);
-	var_dump($total);
-	var_dump($siteTotals);
-	var_dump($basedOnType);
-	
+	$jsonRet = array("totalEnrolled"=>$total, "enrolledBySiteAndType"=>$siteAndType, "totalsBySite"=>$siteTotals, "basedOnType"=>$basedOnType);
+	$retStr = json_encode($jsonRet);
+	echo $retStr;
 }
 
 main();
+?>
 ?>
